@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Thermometer, Droplets, Wind, MapPin } from 'lucide-react'
 import { Loader2 } from 'lucide-react'
-import { WEATHER_API_KEY } from '@/components/api-key'
 
 
 const API_BASE_URL = 'https://api.openweathermap.org/data/2.5'
@@ -61,8 +60,8 @@ export default function WeatherApp() {
     setLoading(true)
     setError(null)
     try {
-      let currentUrl = `${API_BASE_URL}/weather?appid=${WEATHER_API_KEY}&units=metric`
-      let forecastUrl = `${API_BASE_URL}/forecast?appid=${WEATHER_API_KEY}&units=metric`
+      let currentUrl = `${API_BASE_URL}/weather?appid=${process.env.WEATHER_API_KEY}&units=metric`
+      let forecastUrl = `${API_BASE_URL}/forecast?appid=${process.env.WEATHER_API_KEY}&units=metric`
 
       if (lat && lon) {
         currentUrl += `&lat=${lat}&lon=${lon}`
@@ -74,6 +73,7 @@ export default function WeatherApp() {
         throw new Error('No location provided')
       }
 
+      // Since we have more than 1 promises to resolve we use Promise.all()
       const [currentResponse, forecastResponse] = await Promise.all([
         fetch(currentUrl),
         fetch(forecastUrl)
@@ -83,8 +83,12 @@ export default function WeatherApp() {
         throw new Error('City not found')
       }
 
-      const currentData = await currentResponse.json()
+      const currentData = await currentResponse.json()  // Extracts the json data
       const forecastData = await forecastResponse.json()
+
+      // Check the json response object also
+      // console.log(currentData)
+      console.log(forecastData)
 
       const processedCurrentData: WeatherData = {
         city: currentData.name,
@@ -96,7 +100,7 @@ export default function WeatherApp() {
 
       const processedForecastData: ForecastData[] = forecastData.list
         .filter((item: any, index: number) => index % 8 === 0)
-        .slice(0, 5)
+        .slice(0, 5)  // An extra check so that it gives us only 5 days data
         .map((item: any) => ({
           date: new Date(item.dt * 1000).toLocaleDateString(),
           temp: item.main.temp,
@@ -110,6 +114,7 @@ export default function WeatherApp() {
     } catch (err) {
       setError('Failed to fetch weather data. Please try again.')
     } finally {
+      // When the api is settled we change setLoading to false
       setLoading(false)
     }
   }

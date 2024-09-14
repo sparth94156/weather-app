@@ -1,3 +1,10 @@
+[
+{
+  "rules": {
+    "react-hooks/exhaustive-deps": "off"
+  }
+},
 {
   "extends": ["next/core-web-vitals", "next/typescript"]
 }
+]

@@ -38,6 +38,7 @@ export default function WeatherApp() {
 
   useEffect(() => {
     getUserLocation()
+      // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const getUserLocation = () => {
